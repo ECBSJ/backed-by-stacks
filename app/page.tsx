@@ -1,12 +1,12 @@
-"use client";
+"use client"
 
-import { Button, Flex, Heading, Tooltip } from "@chakra-ui/react";
-import CampaignsList from "../ui/components/CampaignsList";
-import AppHeader from "../ui/components/AppHeader";
-import PageContainer from "../ui/components/PageContainer";
-import Link from "next/link";
-import { useContext } from "react";
-import WalletContext from "../ui/context/WalletContext";
+import { Button, Flex, Heading, Tooltip } from "@chakra-ui/react"
+import CampaignsList from "../ui/components/CampaignsList"
+import AppHeader from "../ui/components/AppHeader"
+import PageContainer from "../ui/components/PageContainer"
+import Link from "next/link"
+import { useContext, useEffect } from "react"
+import WalletContext from "../ui/context/WalletContext"
 
 // UI to
 // x- connect wallet
@@ -15,7 +15,18 @@ import WalletContext from "../ui/context/WalletContext";
 // - submit a new campaign
 // - view history of campaigns that connected wallet has backed
 export default function Page() {
-  const { isWalletConnected } = useContext(WalletContext);
+  const { isWalletConnected } = useContext(WalletContext)
+
+  // const makeApiCall = async () => {
+  //   await fetch("/api/test", {
+  //     method: "POST",
+  //     body: JSON.stringify({ hello: "wassup" })
+  //   })
+  // }
+
+  // useEffect(() => {
+  //   makeApiCall()
+  // }, [])
 
   return (
     <PageContainer>
@@ -23,26 +34,19 @@ export default function Page() {
         <AppHeader />
         <Flex justify="space-between" align="center">
           <Heading size="md">Browse all Fundraisers</Heading>
-          <Tooltip
-            label={
-              !isWalletConnected
-                ? "Connect your Stacks wallet above to create a new fundraiser."
-                : null
-            }
-          >
-            <Button
-              isDisabled={!isWalletConnected}
-              as={Link}
-              href="/campaigns/new"
-              variant="solid"
-              colorScheme="purple"
-            >
-              Create a fundraiser
+          <Flex justify="center" columnGap="10px" align="center">
+            <Tooltip label={!isWalletConnected ? "Connect your Stacks wallet above to create a new fundraiser." : null}>
+              <Button isDisabled={!isWalletConnected} as={Link} href="/campaigns/new" variant="solid" colorScheme="purple">
+                Create a fundraiser
+              </Button>
+            </Tooltip>
+            <Button as={Link} href="/contributions" variant="solid" colorScheme="cyan">
+              View All Contributions
             </Button>
-          </Tooltip>
+          </Flex>
         </Flex>
         <CampaignsList />
       </Flex>
     </PageContainer>
-  );
+  )
 }
