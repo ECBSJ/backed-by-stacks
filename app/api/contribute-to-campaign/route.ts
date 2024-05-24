@@ -1,14 +1,8 @@
 import { sql } from "@vercel/postgres"
-import {
-  Contribution,
-  ContributionSchema,
-  contributionDbToClient
-} from "../../models"
+import { Contribution, ContributionSchema } from "../../models"
 
 export async function GET() {
-  console.log("GET ran!")
-
-  return new Response("done")
+  return new Response("GET Ran!")
 }
 
 // export async function POST(request: Request) {
