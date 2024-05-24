@@ -24,7 +24,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const body = await request.json()
+    const body: any = await request.json()
     contribution_chainhook.amount = Number(
       body.apply[0].transactions[0].metadata.kind.data.args[1].slice(1)
     )
