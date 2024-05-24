@@ -1,10 +1,14 @@
 import { sql } from "@vercel/postgres"
-import { Contribution, ContributionSchema, contributionDbToClient } from "../../models"
+import {
+  Contribution,
+  ContributionSchema,
+  contributionDbToClient
+} from "../../models"
 
 // GET /api/contributions
 // Retrieve all contributions
 
-export async function GET(request: Request) {
+export async function GET() {
   const result = await sql`SELECT * FROM Contributions`
 
   const contributions: Contribution[] = result.rows.map(contributionDbToClient)
