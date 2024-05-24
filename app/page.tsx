@@ -5,7 +5,7 @@ import CampaignsList from "../ui/components/CampaignsList"
 import AppHeader from "../ui/components/AppHeader"
 import PageContainer from "../ui/components/PageContainer"
 import Link from "next/link"
-import { useContext, useEffect } from "react"
+import { useContext } from "react"
 import WalletContext from "../ui/context/WalletContext"
 
 // UI to
@@ -17,17 +17,6 @@ import WalletContext from "../ui/context/WalletContext"
 export default function Page() {
   const { isWalletConnected } = useContext(WalletContext)
 
-  // const makeApiCall = async () => {
-  //   await fetch("/api/test", {
-  //     method: "POST",
-  //     body: JSON.stringify({ hello: "wassup" })
-  //   })
-  // }
-
-  // useEffect(() => {
-  //   makeApiCall()
-  // }, [])
-
   return (
     <PageContainer>
       <Flex direction="column" gap="8">
@@ -35,12 +24,29 @@ export default function Page() {
         <Flex justify="space-between" align="center">
           <Heading size="md">Browse all Fundraisers</Heading>
           <Flex justify="center" columnGap="10px" align="center">
-            <Tooltip label={!isWalletConnected ? "Connect your Stacks wallet above to create a new fundraiser." : null}>
-              <Button isDisabled={!isWalletConnected} as={Link} href="/campaigns/new" variant="solid" colorScheme="purple">
+            <Tooltip
+              label={
+                !isWalletConnected
+                  ? "Connect your Stacks wallet above to create a new fundraiser."
+                  : null
+              }
+            >
+              <Button
+                isDisabled={!isWalletConnected}
+                as={Link}
+                href="/campaigns/new"
+                variant="solid"
+                colorScheme="purple"
+              >
                 Create a fundraiser
               </Button>
             </Tooltip>
-            <Button as={Link} href="/contributions" variant="solid" colorScheme="cyan">
+            <Button
+              as={Link}
+              href="/contributions"
+              variant="solid"
+              colorScheme="cyan"
+            >
               View All Contributions
             </Button>
           </Flex>
