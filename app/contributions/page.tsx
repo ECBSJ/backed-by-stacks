@@ -61,7 +61,7 @@ export default function Page() {
                       value={contr.amount}
                       onChange={(e) => {
                         // @ts-ignore
-                        null
+                        e.preventDefault()
                       }}
                     />
                   </InputGroup>
