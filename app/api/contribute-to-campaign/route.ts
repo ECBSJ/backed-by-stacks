@@ -5,13 +5,6 @@ export async function GET() {
   return new Response("GET Ran!")
 }
 
-// export async function POST(request: Request) {
-//   let result = await request.json()
-//   console.log(result)
-
-//   return new Response(JSON.stringify(result))
-// }
-
 // Handle contribution made to campaign from external
 export async function POST(request: Request) {
   let contribution: Contribution
@@ -60,11 +53,11 @@ export async function POST(request: Request) {
   `
 
   // Add the contribution to the total for the campaign
-  await sql`
-    UPDATE Campaigns
-    SET TotalRaised = Campaigns.TotalRaised + ${contribution.amount}
-    WHERE ID = ${contribution.campaignId};
-  `
+  // await sql`
+  //   UPDATE Campaigns
+  //   SET TotalRaised = Campaigns.TotalRaised + ${contribution.amount}
+  //   WHERE ID = ${contribution.campaignId};
+  // `
 
   resultingContribution = result.rows[0]
 

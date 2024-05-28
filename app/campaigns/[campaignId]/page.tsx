@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import {
   Alert,
@@ -8,92 +8,96 @@ import {
   Box,
   Flex,
   Link,
-  useToast,
-} from "@chakra-ui/react";
-import PageContainer from "../../../ui/components/PageContainer";
-import AppHeader from "../../../ui/components/AppHeader";
-import { CampaignDetailsResponse, Contribution } from "../../models";
-import { useContext, useEffect, useState } from "react";
-import axios from "axios";
-import CampaignDetails from "../../../ui/components/CampaignDetails";
-import CampaignFunding from "../../../ui/components/CampaignFunding";
-import useCurrentChainTip from "../../../ui/hooks/useCurrentChainTip";
+  useToast
+} from "@chakra-ui/react"
+import PageContainer from "../../../ui/components/PageContainer"
+import AppHeader from "../../../ui/components/AppHeader"
+import { CampaignDetailsResponse, Contribution } from "../../models"
+import { useContext, useEffect, useState } from "react"
+import axios from "axios"
+import CampaignDetails from "../../../ui/components/CampaignDetails"
+import CampaignFunding from "../../../ui/components/CampaignFunding"
+import useCurrentChainTip from "../../../ui/hooks/useCurrentChainTip"
 import {
   CONTRACT_DEPLOYER_ADDRESS,
   CONTRACT_NAME,
   ContractFunctionName,
-  STACKS_NETWORK,
-} from "../../../utils/stacks-api";
-import WalletContext from "../../../ui/context/WalletContext";
-import { ustxToStx } from "../../../utils/token-utils";
+  STACKS_NETWORK
+} from "../../../utils/stacks-api"
+import WalletContext from "../../../ui/context/WalletContext"
+import { ustxToStx } from "../../../utils/token-utils"
 import {
   ContractCallOptions,
   FinishedTxData,
-  openContractCall,
-} from "@stacks/connect";
+  openContractCall
+} from "@stacks/connect"
 import {
   Cl,
   FungibleConditionCode,
   PostConditionMode,
-  makeContractSTXPostCondition,
-} from "@stacks/transactions";
+  makeContractSTXPostCondition
+} from "@stacks/transactions"
 
 export default function Page({ params }: { params: { campaignId: string } }) {
-  const campaignId = params.campaignId;
-  const toast = useToast();
+  const campaignId = params.campaignId
+  const toast = useToast()
 
-  const { mainnetAddress, testnetAddress } = useContext(WalletContext);
+  const { mainnetAddress, testnetAddress } = useContext(WalletContext)
   const userWalletAddress = STACKS_NETWORK.isMainnet()
     ? mainnetAddress
-    : testnetAddress;
+    : testnetAddress
 
   const [campaignData, setCampaignData] =
-    useState<CampaignDetailsResponse | null>(null);
+    useState<CampaignDetailsResponse | null>(null)
   const [userContribution, setUserContribution] = useState<Contribution | null>(
     null
-  );
+  )
 
   const fetchCampaign = async () => {
     try {
-      const { data } = await axios.get(`/api/campaigns/${campaignId}`);
-      setCampaignData(data);
+      const { data } = await axios.get(`/api/campaigns/${campaignId}`)
+      setCampaignData(data)
     } catch (error) {
-      console.error(error);
+      console.error(error)
       toast({
         status: "error",
-        title: "There was an unknown problem loading this fundraiser.",
-      });
+        title: "There was an unknown problem loading this fundraiser."
+      })
     }
-  };
+  }
 
   const fetchUserContribution = async () => {
-    const { data } = await axios(
-      `/api/campaigns/${campaignId}/contributions/${userWalletAddress}`
-    );
-    setUserContribution(data);
-  };
+    try {
+      const { data } = await axios(
+        `/api/campaigns/${campaignId}/contributions/${userWalletAddress}`
+      )
+      setUserContribution(data)
+    } catch (error) {
+      console.error(error)
+    }
+  }
 
   useEffect(() => {
-    fetchCampaign();
-  }, [campaignId]);
+    fetchCampaign()
+  }, [campaignId])
 
   useEffect(() => {
-    fetchUserContribution();
-  }, [userWalletAddress]);
+    fetchUserContribution()
+  }, [userWalletAddress])
 
-  const chainTip = useCurrentChainTip();
-  const campaign = campaignData?.campaign || null;
-  const fundingInfo = campaignData?.fundingInfo || null;
-  const isDataValidatedOnChain = campaignData?.isDataValidatedOnChain;
+  const chainTip = useCurrentChainTip()
+  const campaign = campaignData?.campaign || null
+  const fundingInfo = campaignData?.fundingInfo || null
+  const isDataValidatedOnChain = campaignData?.isDataValidatedOnChain
 
-  const isCampaignOwner = campaign?.owner === userWalletAddress;
-  const isCampaignContributor = !!userContribution;
+  const isCampaignOwner = campaign?.owner === userWalletAddress
+  const isCampaignContributor = !!userContribution
   const isExpired =
     campaign?.blockHeightExpiration &&
     chainTip &&
-    chainTip >= campaign.blockHeightExpiration;
+    chainTip >= campaign.blockHeightExpiration
   const isSucceeded =
-    Number(campaign?.totalRaised) >= Number(campaign?.fundingGoal);
+    Number(campaign?.totalRaised) >= Number(campaign?.fundingGoal)
 
   const handleCollectFunds = async () => {
     const postCondition = makeContractSTXPostCondition(
@@ -101,8 +105,8 @@ export default function Page({ params }: { params: { campaignId: string } }) {
       CONTRACT_NAME,
       FungibleConditionCode.LessEqual,
       campaign?.totalRaised || 0
-    );
-    const functionName: ContractFunctionName = "fund-campaign";
+    )
+    const functionName: ContractFunctionName = "fund-campaign"
     const collectFundsContractCallOptions: ContractCallOptions = {
       network: STACKS_NETWORK,
       contractName: CONTRACT_NAME,
@@ -112,33 +116,33 @@ export default function Page({ params }: { params: { campaignId: string } }) {
       postConditionMode: PostConditionMode.Deny,
       postConditions: [postCondition],
       onFinish: async (data: FinishedTxData) => {
-        console.log("Funding request submitted in tx: " + data.txId);
+        console.log("Funding request submitted in tx: " + data.txId)
         toast({
           status: "success",
           title: "Funds requested",
           description:
-            "Your collection of funds is pending. You should receive them soon!",
-        });
+            "Your collection of funds is pending. You should receive them soon!"
+        })
         await axios.put(`/api/campaigns/${campaignId}`, {
           ...campaign,
-          isCollected: true,
-        });
-        fetchCampaign();
-      },
-    };
+          isCollected: true
+        })
+        fetchCampaign()
+      }
+    }
 
     try {
-      await openContractCall(collectFundsContractCallOptions);
+      await openContractCall(collectFundsContractCallOptions)
     } catch (error) {
-      console.error(error);
+      console.error(error)
       toast({
         status: "error",
         title: "Error requesting your funds",
         description:
-          "There was a problem collecting your raised funds. Please try again later.",
-      });
+          "There was a problem collecting your raised funds. Please try again later."
+      })
     }
-  };
+  }
 
   const handleGetRefund = async () => {
     const postCondition = makeContractSTXPostCondition(
@@ -146,8 +150,8 @@ export default function Page({ params }: { params: { campaignId: string } }) {
       CONTRACT_NAME,
       FungibleConditionCode.LessEqual,
       userContribution?.amount || 0
-    );
-    const functionName: ContractFunctionName = "refund-contribution";
+    )
+    const functionName: ContractFunctionName = "refund-contribution"
     const getRefundContractCallOptions: ContractCallOptions = {
       network: STACKS_NETWORK,
       contractName: CONTRACT_NAME,
@@ -155,55 +159,55 @@ export default function Page({ params }: { params: { campaignId: string } }) {
       functionName,
       functionArgs: [
         Cl.uint(campaign?.chainConfirmedId || 0),
-        Cl.principal(userWalletAddress || ""),
+        Cl.principal(userWalletAddress || "")
       ],
       postConditionMode: PostConditionMode.Deny,
       postConditions: [postCondition],
       onFinish: async (data: FinishedTxData) => {
-        console.log("Refund submitted in tx: " + data.txId);
+        console.log("Refund submitted in tx: " + data.txId)
         toast({
           status: "success",
           title: "Refund requested",
-          description: "Your refund is pending. You'll receive it soon!",
-        });
+          description: "Your refund is pending. You'll receive it soon!"
+        })
         await axios.put(
           `/api/campaigns/${campaignId}/contributions/${userWalletAddress}`,
           { ...userContribution, isRefunded: true }
-        );
-        fetchUserContribution();
-      },
-    };
+        )
+        fetchUserContribution()
+      }
+    }
 
     try {
-      await openContractCall(getRefundContractCallOptions);
+      await openContractCall(getRefundContractCallOptions)
     } catch (error) {
-      console.error(error);
+      console.error(error)
       toast({
         status: "error",
         title: "Error requesting refund",
         description:
-          "There was a problem getting your refund. Please try again later.",
-      });
+          "There was a problem getting your refund. Please try again later."
+      })
     }
-  };
+  }
   // await axios.put(`/api/campaigns/${campaignId}`, { ...campaign, isCollected: true });
 
   const handleUpdateFromChain = async () => {
     try {
-      await axios.post("/api/webhooks/new-block");
-      await fetchCampaign();
+      await axios.post("/api/webhooks/new-block")
+      await fetchCampaign()
       toast({
         status: "success",
-        title: "Refreshed status from chain.",
-      });
+        title: "Refreshed status from chain."
+      })
     } catch (err) {
-      console.error(err);
+      console.error(err)
       toast({
         status: "error",
-        title: "Error checking status from chain.",
-      });
+        title: "Error checking status from chain."
+      })
     }
-  };
+  }
 
   const fundraiserAlerts = (
     <>
@@ -353,7 +357,7 @@ export default function Page({ params }: { params: { campaignId: string } }) {
         </Alert>
       ) : null}
     </>
-  );
+  )
 
   return (
     <PageContainer>
@@ -374,8 +378,8 @@ export default function Page({ params }: { params: { campaignId: string } }) {
                   fundingInfo={fundingInfo}
                   isExpired={isExpired || false}
                   refreshCampaign={() => {
-                    fetchCampaign();
-                    fetchUserContribution();
+                    fetchCampaign()
+                    fetchUserContribution()
                   }}
                 />
               </Flex>
@@ -394,5 +398,5 @@ export default function Page({ params }: { params: { campaignId: string } }) {
         )}
       </Flex>
     </PageContainer>
-  );
+  )
 }
