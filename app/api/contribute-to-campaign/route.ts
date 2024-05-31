@@ -1,5 +1,6 @@
 import { sql } from "@vercel/postgres"
 import { Contribution, ContributionSchema } from "../../models"
+// import { Payload } from "@hirosystems/chainhook-client"
 
 export async function GET() {
   return new Response("GET Ran!")

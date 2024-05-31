@@ -45,6 +45,7 @@ export default function Page() {
               as={Link}
               href="/contributions"
               variant="solid"
+              textColor="white"
               colorScheme="cyan"
             >
               View All Contributions
