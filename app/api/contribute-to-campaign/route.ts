@@ -1,15 +1,12 @@
 import { sql } from "@vercel/postgres"
 import { Contribution, ContributionSchema } from "../../models"
-// import { Payload } from "@hirosystems/chainhook-client"
+import type { StacksPayload } from "@hirosystems/chainhook-client"
 
-export async function GET() {
-  return new Response("GET Ran!")
-}
-
-// Handle contribution made to campaign from external
+// Populate db table with all individual contributions
 export async function POST(request: Request) {
   let contribution: Contribution
-  let contribution_chainhook = {
+
+  let extractedData = {
     amount: 0,
     campaignId: 0,
     dateCreated: 0,
@@ -18,21 +15,43 @@ export async function POST(request: Request) {
   }
 
   try {
-    const body: any = await request.json()
-    contribution_chainhook.amount = Number(
-      body.apply[0].transactions[0].metadata.kind.data.args[1].slice(1)
-    )
-    contribution_chainhook.campaignId =
-      Number(
-        body.apply[0].transactions[0].metadata.kind.data.args[0].slice(1)
-      ) + 1
-    contribution_chainhook.dateCreated = body.apply[0].timestamp * 1000
-    contribution_chainhook.dateUpdated = body.apply[0].timestamp * 1000
-    // contribution_chainhook.isRefunded = null
-    contribution_chainhook.principal =
-      body.apply[0].transactions[0].metadata.sender
+    const payload: StacksPayload = await request.json()
+    const { apply, chainhook } = payload
+    const { transactions, timestamp } = apply[0]
 
-    contribution = ContributionSchema.parse(contribution_chainhook)
+    let method: String
+    let contract_identifier: String
+
+    if (chainhook.predicate.scope == "contract_call") {
+      method = chainhook.predicate.method
+      contract_identifier = chainhook.predicate.contract_identifier
+    } else {
+      return
+    }
+
+    if (
+      method == "contribute-to-campaign" &&
+      contract_identifier ==
+        "SPKDTDEAR9PX0YJGQQ34TNTY9087E3029JPF2AH1.campaign-funding"
+    ) {
+      for (const transaction of transactions) {
+        const { metadata: txMetadata } = transaction
+        if (txMetadata.kind.type == "ContractCall") {
+          if (txMetadata.success === true) {
+            extractedData.amount = Number(txMetadata.kind.data.args[1].slice(1))
+            extractedData.campaignId =
+              Number(txMetadata.kind.data.args[0].slice(1)) + 1
+            extractedData.dateCreated = timestamp * 1000
+            extractedData.dateUpdated = timestamp * 1000
+            extractedData.principal = transaction.metadata.sender
+          }
+        }
+      }
+    } else {
+      return
+    }
+
+    contribution = ContributionSchema.parse(extractedData)
   } catch (err) {
     console.error(err)
     return new Response("Invalid contribution data", {
@@ -40,10 +59,8 @@ export async function POST(request: Request) {
     })
   }
 
-  // TODO: improve validation & error handling. Most issues just throw and respond with 500.
   let resultingContribution
 
-  //  If the given principal has made a previous contribution, sum the total in the existing db row
   const result = await sql`
     INSERT INTO Contributions(CampaignID, Principal, Amount, DateCreated, DateUpdated)
     VALUES (${contribution.campaignId}, ${contribution.principal}, ${contribution.amount}, to_timestamp(${contribution.dateCreated} / 1000.0), to_timestamp(${contribution.dateUpdated} / 1000.0))
@@ -52,13 +69,6 @@ export async function POST(request: Request) {
       DateUpdated = EXCLUDED.DateUpdated
     RETURNING *;
   `
-
-  // Add the contribution to the total for the campaign
-  // await sql`
-  //   UPDATE Campaigns
-  //   SET TotalRaised = Campaigns.TotalRaised + ${contribution.amount}
-  //   WHERE ID = ${contribution.campaignId};
-  // `
 
   resultingContribution = result.rows[0]
 
