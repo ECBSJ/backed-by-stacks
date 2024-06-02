@@ -57,9 +57,6 @@ export default function Page() {
                       contr.dateUpdated
                     ).toLocaleDateString()
 
-                    let firstDate = new Date(
-                      contr.dateCreated
-                    ).toLocaleDateString()
                     return (
                       <FormControl
                         bg="gray.100"
