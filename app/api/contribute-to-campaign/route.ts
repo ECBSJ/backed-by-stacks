@@ -15,7 +15,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const payload: StacksPayload = await request.json()
+    const payload: StacksPayload = (await request.json()) as any
     const { apply, chainhook } = payload
     const { transactions, timestamp } = apply[0]
 
