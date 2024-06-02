@@ -29,4 +29,13 @@ CREATE TABLE Contributions (
   FOREIGN KEY (CampaignID) REFERENCES Campaigns(ID)
 )
 
+CREATE TABLE ViewAllContributions (
+  CampaignID INTEGER NOT NULL,
+  Principal VARCHAR(255) NOT NULL,
+  Amount INTEGER,
+  DateCreated TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  DateUpdated TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  IsRefunded BOOLEAN
+)
+
 -- TODO: add isCollected and isRefunded

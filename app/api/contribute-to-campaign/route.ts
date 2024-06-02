@@ -44,6 +44,10 @@ export async function POST(request: Request) {
             extractedData.dateCreated = timestamp * 1000
             extractedData.dateUpdated = timestamp * 1000
             extractedData.principal = transaction.metadata.sender
+          } else {
+            return new Response(
+              "This transaction was unsuccessful. Denied entry into db."
+            )
           }
         }
       }
@@ -62,11 +66,8 @@ export async function POST(request: Request) {
   let resultingContribution
 
   const result = await sql`
-    INSERT INTO Contributions(CampaignID, Principal, Amount, DateCreated, DateUpdated)
+    INSERT INTO ViewAllContributions(CampaignID, Principal, Amount, DateCreated, DateUpdated)
     VALUES (${contribution.campaignId}, ${contribution.principal}, ${contribution.amount}, to_timestamp(${contribution.dateCreated} / 1000.0), to_timestamp(${contribution.dateUpdated} / 1000.0))
-    ON CONFLICT (CampaignID, Principal) DO UPDATE
-      SET Amount = Contributions.Amount + EXCLUDED.Amount,
-      DateUpdated = EXCLUDED.DateUpdated
     RETURNING *;
   `
 

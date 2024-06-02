@@ -68,9 +68,9 @@ export default function Page() {
                         key={index}
                       >
                         <FormLabel>
-                          Contribution {contributions.length - index} Details:
+                          #{contributions.length - index} Contribution Details:
                         </FormLabel>
-                        <Box>Recent Contribution: {recentDate}</Box>
+                        <Box>Contributed Amount ($STX):</Box>
 
                         <InputGroup>
                           <InputLeftAddon
@@ -94,7 +94,7 @@ export default function Page() {
                         <FormHelperText>
                           <Box>Donor: {contr.principal}</Box>
                           <Box>For Campaign ID: {contr.campaignId}</Box>
-                          <Box>First Contribution: {firstDate}</Box>
+                          <Box>Contribution Date: {recentDate}</Box>
 
                           {/* TODO: show current STX price */}
                         </FormHelperText>

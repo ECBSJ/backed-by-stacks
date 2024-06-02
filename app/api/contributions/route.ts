@@ -9,7 +9,7 @@ import {
 // Retrieve all contributions
 
 export async function GET() {
-  const result = await sql`SELECT * FROM Contributions`
+  const result = await sql`SELECT * FROM ViewAllContributions`
 
   const contributions: Contribution[] = result.rows.map(contributionDbToClient)
 
