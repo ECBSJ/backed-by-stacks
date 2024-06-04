@@ -37,7 +37,7 @@ export async function POST(request: Request) {
       for (const transaction of transactions) {
         const { metadata: txMetadata } = transaction
         if (txMetadata.kind.type == "ContractCall") {
-          if (txMetadata.success === true) {
+          if (txMetadata.success) {
             extractedData.amount = Number(txMetadata.kind.data.args[1].slice(1))
             extractedData.campaignId =
               Number(txMetadata.kind.data.args[0].slice(1)) + 1

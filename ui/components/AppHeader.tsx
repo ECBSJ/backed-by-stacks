@@ -4,10 +4,10 @@ import {
   Link as ChakraLink,
   Flex,
   Heading,
-  Text,
-} from "@chakra-ui/react";
-import ConnectWalletButton from "./ConnectWalletButton";
-import Link from "next/link";
+  Text
+} from "@chakra-ui/react"
+import ConnectWalletButton from "./ConnectWalletButton"
+import Link from "next/link"
 
 const AppHeader = () => {
   return (
@@ -19,7 +19,7 @@ const AppHeader = () => {
           </Heading>
           <Box>
             <Badge variant="outline" colorScheme="orange">
-              testnet
+              mainnet
             </Badge>
           </Box>
         </Flex>
@@ -38,7 +38,7 @@ const AppHeader = () => {
       </Flex>
       <ConnectWalletButton />
     </Flex>
-  );
-};
+  )
+}
 
-export default AppHeader;
+export default AppHeader
